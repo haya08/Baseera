@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Baseera.Domain\Baseera.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>
