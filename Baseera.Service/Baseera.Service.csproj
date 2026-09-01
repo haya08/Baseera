@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Baseera.Core\Baseera.Core.csproj" />
     <ProjectReference Include="..\Baseera.Domain\Baseera.Domain.csproj" />
-    <ProjectReference Include="..\Baseera.Infrastructure\Baseera.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

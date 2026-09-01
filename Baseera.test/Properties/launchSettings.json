@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Baseera.test": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "GEMINI-API-KEY": ""
+      }
+    }
+  }
+}

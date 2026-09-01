@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Baseera.Domain\Baseera.Domain.csproj" />
-    <ProjectReference Include="..\Baseera.Service\Baseera.Service.csproj" />
   </ItemGroup>
 
 </Project>

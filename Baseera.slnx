@@ -4,4 +4,5 @@
   <Project Path="Baseera.Domain/Baseera.Domain.csproj" />
   <Project Path="Baseera.Infrastructure/Baseera.Infrastructure.csproj" />
   <Project Path="Baseera.Service/Baseera.Service.csproj" />
+  <Project Path="Baseera.test/Baseera.test.csproj" Id="296c6ced-c3e8-46b5-be8d-a5952a85423e" />
 </Solution>
