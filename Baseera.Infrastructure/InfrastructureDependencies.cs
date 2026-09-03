@@ -15,9 +15,10 @@ namespace Baseera.Infrastructure
         {
             services.Configure<GeminiOptions>(options =>
             {
-                configuration
-                    .GetSection("Gemini")
-                    .Bind(options);
+                options.ApiKey =
+                    Environment.GetEnvironmentVariable("GEMINI_API_KEY")
+                    ?? throw new InvalidOperationException(
+                        "GEMINI_API_KEY was not found.");
             });
 
             services.AddSingleton(sp =>

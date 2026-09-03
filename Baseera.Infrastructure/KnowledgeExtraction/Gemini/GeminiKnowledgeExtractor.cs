@@ -3,7 +3,7 @@ using Baseera.Core.KnowledgeExtraction.Abstracts;
 using Baseera.Core.KnowledgeExtraction.Prompts;
 using Google.GenAI;
 using Google.GenAI.Types;
-
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Type = Google.GenAI.Types.Type;
@@ -15,10 +15,10 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
     private readonly Client _client;
     private readonly GeminiOptions _options;
 
-    public GeminiKnowledgeExtractor(Client client, GeminiOptions options)
+    public GeminiKnowledgeExtractor(Client client, IOptions<GeminiOptions> options)
     {
         _client = client;
-        _options = options;
+        _options = options.Value;
     }
 
     public async Task<KnowledgeExtractionResult> ExtractAsync(
