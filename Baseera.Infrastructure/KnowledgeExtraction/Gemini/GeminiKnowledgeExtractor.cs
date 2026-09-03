@@ -1,7 +1,6 @@
 ﻿using Baseera.Core.Documents.Models;
 using Baseera.Core.KnowledgeExtraction.Abstracts;
 using Baseera.Core.KnowledgeExtraction.Prompts;
-
 using Google.GenAI;
 using Google.GenAI.Types;
 
@@ -9,15 +8,17 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Type = Google.GenAI.Types.Type;
 
-namespace Baseera.Infrastructure.KnowledgeExtraction;
+namespace Baseera.Infrastructure.KnowledgeExtraction.Gemini;
 
 public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
 {
     private readonly Client _client;
+    private readonly GeminiOptions _options;
 
-    public GeminiKnowledgeExtractor(Client client)
+    public GeminiKnowledgeExtractor(Client client, GeminiOptions options)
     {
         _client = client;
+        _options = options;
     }
 
     public async Task<KnowledgeExtractionResult> ExtractAsync(
@@ -52,7 +53,7 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
         };
 
         var response = await _client.Models.GenerateContentAsync(
-            model: "gemini-3.6-flash",
+            model: _options.Model,
             contents: text,
             config: config,
             cancellationToken: cancellationToken);
