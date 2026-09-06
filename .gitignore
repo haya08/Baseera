@@ -364,3 +364,7 @@ FodyWeavers.xsd
 
 # Environment variables / secrets
 **/.env
+
+# Ignore .NET configuration files
+appsettings.json
+appsettings.Development.json
