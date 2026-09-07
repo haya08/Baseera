@@ -1,4 +1,4 @@
-﻿using Baseera.Core.Documents.Models;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
 
 namespace Baseera.Core.KnowledgeExtraction.Abstracts
 {

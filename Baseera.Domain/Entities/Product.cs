@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Baseera.Domain.Enums;
 
 namespace Baseera.Domain.Entities
 {
-    internal class Product
+    public class Product : BaseEntity
     {
+        public ProductType ProductType { get; set; }
     }
 }

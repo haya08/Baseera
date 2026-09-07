@@ -1,4 +1,4 @@
-﻿using Baseera.Core.Documents.Models;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
 using DotNetEnv;
 using Google.GenAI;
 using Google.GenAI.Types;
@@ -141,9 +141,9 @@ Console.WriteLine("================================");
 foreach (var relationship in extractionResult.Relationships)
 {
     Console.WriteLine(
-        $"{relationship.Source} " +
+        $"{relationship.SourceId} " +
         $"--[{relationship.Relationship}]--> " +
-        $"{relationship.Target} " +
+        $"{relationship.TargetId} " +
         $"| {relationship.Confidence}");
 }
 

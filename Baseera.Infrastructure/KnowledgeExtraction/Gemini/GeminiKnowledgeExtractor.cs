@@ -1,5 +1,5 @@
-﻿using Baseera.Core.Documents.Models;
-using Baseera.Core.KnowledgeExtraction.Abstracts;
+﻿using Baseera.Core.KnowledgeExtraction.Abstracts;
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Core.KnowledgeExtraction.Prompts;
 using Google.GenAI;
 using Google.GenAI.Types;
