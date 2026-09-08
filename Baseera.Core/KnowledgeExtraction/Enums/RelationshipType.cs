@@ -2,6 +2,7 @@
 {
     public enum RelationshipType
     {
+        HasAlias,
         HasProduct,
         HasService,
         HasFeature,

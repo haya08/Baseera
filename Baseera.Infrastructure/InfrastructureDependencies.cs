@@ -57,6 +57,10 @@ namespace Baseera.Infrastructure
                         options.Password));
             });
 
+            services.AddScoped<ICandidateProvider, Neo4jCandidateProvider>();
+
+            services.AddScoped<IResolutionJudge, GeminiResolutionJudge>();
+
             return services;
         }
     }

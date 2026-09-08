@@ -9,6 +9,7 @@
         Topic = 5,
         Person = 6,
         Campaign = 7,
-        Event = 8
+        Event = 8,
+        Alias = 9
     }
 }
