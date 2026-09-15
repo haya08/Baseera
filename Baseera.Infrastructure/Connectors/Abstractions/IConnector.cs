@@ -6,10 +6,10 @@ namespace Baseera.Infrastructure.Connectors.Abstractions
 {
     public interface IConnector
     {
-        Platform Platform { get; }
+    Platform Platform { get; }
 
-        Task<IReadOnlyList<UnifiedRawDocument>> CollectAsync(
-            TbSearchQuery query,
-            CancellationToken cancellationToken = default);
-    }
+    Task<IReadOnlyList<UnifiedRawDocument>> GetDocumentsAsync(
+        string url,
+        CancellationToken cancellationToken = default);
+}
 }

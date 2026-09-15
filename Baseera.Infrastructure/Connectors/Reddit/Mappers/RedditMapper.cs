@@ -27,7 +27,8 @@ namespace Baseera.Infrastructure.Connectors.Reddit.Mappers
 
                 Author = post.Data.Author,
 
-                PublishedAt = post.Data.CreatedUtc,
+                PublishedAt = DateTimeOffset.FromUnixTimeSeconds(
+                (long)post.Data.CreatedUtc),
 
                 Metadata = CreateMetadata(post),
 
@@ -56,7 +57,8 @@ namespace Baseera.Infrastructure.Connectors.Reddit.Mappers
 
                     Body = comment.Body,
 
-                    PublishedAt = comment.CreatedUtc,
+                    PublishedAt = DateTimeOffset.FromUnixTimeSeconds(
+                    (long)comment.CreatedUtc),
 
                     Score = comment.Score,
 
