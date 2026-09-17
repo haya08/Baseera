@@ -3,6 +3,7 @@ using Baseera.Core.KnowledgeResolution.Abstracts;
 using Baseera.Infrastructure.KnowledgeExtraction.Gemini;
 using Baseera.Infrastructure.KnowledgeResolution.Gemini;
 using Baseera.Infrastructure.KnowledgeResolution.Neo4j;
+using Baseera.Infrastructure.Options;
 using Google.GenAI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

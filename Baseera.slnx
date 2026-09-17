@@ -5,6 +5,7 @@
   <Project Path="Baseera.Api/Baseera.Api.csproj" />
   <Project Path="Baseera.Core/Baseera.Core.csproj" />
   <Project Path="Baseera.Domain/Baseera.Domain.csproj" />
+  <Project Path="Baseera.Infrastructure.Tests/Baseera.Infrastructure.Tests.csproj" Id="889080cd-78e9-4df7-a7f6-5cf8e62c7779" />
   <Project Path="Baseera.Infrastructure/Baseera.Infrastructure.csproj" />
   <Project Path="Baseera.Service/Baseera.Service.csproj" />
   <Project Path="Baseera.test/Baseera.test.csproj" Id="296c6ced-c3e8-46b5-be8d-a5952a85423e" />

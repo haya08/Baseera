@@ -1,4 +1,5 @@
 using Baseera.Infrastructure;
+using Baseera.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +17,8 @@ builder.Services.AddSwaggerGen();
 
 #region Dependency Injection
 
-builder.Services.AddInfrastructureDependencies(
-    builder.Configuration);
+builder.Services.AddInfrastructureDependencies(builder.Configuration)
+                .AddServiceDependencies(builder.Configuration);
 
 #endregion
 

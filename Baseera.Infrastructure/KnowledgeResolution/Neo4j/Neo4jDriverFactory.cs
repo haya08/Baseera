@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Baseera.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 using Neo4j.Driver;
 
 namespace Baseera.Infrastructure.KnowledgeResolution.Neo4j

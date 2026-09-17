@@ -38,11 +38,16 @@
 
             For each relevant entity mentioned or clearly expressed in the input text, extract:
 
+            * id
             * name
             * type
             * description
             * evidence
             * confidence
+
+            ### Id
+
+            Assign a unique identifier to each extracted entity.
 
             ### Name
 
@@ -325,9 +330,9 @@
             ],
             "relationships": [
             {
-            "source": "string",
+            "sourceId": "string",
             "relationship": "HasProduct | HasService | HasFeature | HasTopic | RunsCampaign | HasEvent | LedBy | RelatedTo",
-            "target": "string",
+            "targetId": "string",
             "evidence": "string or null",
             "confidence": 0.0
             }

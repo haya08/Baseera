@@ -3,7 +3,7 @@ using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Core.KnowledgeResolution.Abstracts;
 using Baseera.Core.KnowledgeResolution.Enums;
 using Baseera.Core.KnowledgeResolution.Models;
-
+using Baseera.Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
 using Neo4j.Driver;
@@ -392,7 +392,7 @@ public sealed class Neo4jCandidateProvider : ICandidateProvider
     {
         var rankings = new Dictionary<Guid, CandidateRanking>();
 
-        // Full-text results
+        //Full - text results
         for (var i = 0; i < textCandidates.Count; i++)
         {
             var candidate = textCandidates[i];

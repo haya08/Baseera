@@ -1,6 +1,7 @@
 ﻿using Baseera.Core.KnowledgeExtraction.Abstracts;
 using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Core.KnowledgeExtraction.Prompts;
+using Baseera.Infrastructure.Options;
 using Google.GenAI;
 using Google.GenAI.Types;
 using Microsoft.Extensions.Options;
@@ -89,6 +90,10 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
 
             Properties = new Dictionary<string, Schema>
             {
+                ["id"] = new Schema
+                {
+                    Type = Type.String
+                },
                 ["name"] = new Schema
                 {
                     Type = Type.String
@@ -130,6 +135,7 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
 
             Required =
             [
+                "id",
                 "name",
                 "type",
                 "description",
@@ -139,6 +145,7 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
 
             PropertyOrdering =
             [
+                "id",
                 "name",
                 "type",
                 "description",
@@ -153,7 +160,7 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
 
             Properties = new Dictionary<string, Schema>
             {
-                ["source"] = new Schema
+                ["sourceId"] = new Schema
                 {
                     Type = Type.String
                 },
@@ -174,7 +181,7 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
                 }
                 },
 
-                ["target"] = new Schema
+                ["targetId"] = new Schema
                 {
                     Type = Type.String
                 },
@@ -193,18 +200,18 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
 
             Required =
             [
-                "source",
+                "sourceId",
                 "relationship",
-                "target",
+                "targetId",
                 "evidence",
                 "confidence"
             ],
 
             PropertyOrdering =
             [
-                "source",
+                "sourceId",
                 "relationship",
-                "target",
+                "targetId",
                 "evidence",
                 "confidence"
             ]
