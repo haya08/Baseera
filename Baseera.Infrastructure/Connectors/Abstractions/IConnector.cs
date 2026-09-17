@@ -12,4 +12,5 @@ namespace Baseera.Infrastructure.Connectors.Abstractions
         string url,
         CancellationToken cancellationToken = default);
 }
+
 }

@@ -5,5 +5,6 @@ public enum Platform
     Reddit,
     Mastodon,
     Bluesky,
-    Facebook
+    Facebook,
+    Instagram
 }

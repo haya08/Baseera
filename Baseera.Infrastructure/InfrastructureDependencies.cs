@@ -21,6 +21,11 @@ using Baseera.Infrastructure.Connectors.Facebook;
 using Baseera.Infrastructure.Connectors.Facebook.Abstractions;
 using Baseera.Infrastructure.Connectors.Facebook.Clients;
 using Baseera.Infrastructure.Connectors.Facebook.Mappers;
+using Baseera.Infrastructure.Connectors.Instagram;
+using Baseera.Infrastructure.Connectors.Instagram.Abstractions;
+using Baseera.Infrastructure.Connectors.Instagram.Clients;
+using Microsoft.Extensions.Options;
+using Baseera.Infrastructure.Connectors.Instagram.Mappers;
 
 namespace Baseera.Infrastructure
 {
@@ -83,6 +88,26 @@ namespace Baseera.Infrastructure
 
             services.AddScoped<IFacebookMapper, FacebookMapper>();
             services.AddScoped<FacebookConnector>();
+
+
+            services.Configure<InstagramApiOptions>(
+    configuration.GetSection("InstagramApi"));
+
+services.AddHttpClient<IInstagramApiClient, InstagramApiClient>(
+    (serviceProvider, client) =>
+    {
+        var options =
+            serviceProvider
+                .GetRequiredService<
+                    IOptions<InstagramApiOptions>>()
+                .Value;
+
+        client.BaseAddress = new Uri(
+            $"{options.BaseUrl.TrimEnd('/')}/");
+    });
+
+services.AddScoped<InstagramMapper>();
+services.AddScoped<InstagramConnector>();
 
 
 
