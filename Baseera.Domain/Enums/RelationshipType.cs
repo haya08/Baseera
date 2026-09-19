@@ -2,14 +2,14 @@
 {
     public enum RelationshipType
     {
+        HasAlias,
         HasProduct,
-        OffersService,
+        HasService,
         HasFeature,
-        RelatedTo,
+        HasTopic,
         RunsCampaign,
-        Promotes,
-        Targets,
-        AssociatedWith,
-        ParticipatesIn
+        HasEvent,
+        RelatedTo,
+        LedBy
     }
 }

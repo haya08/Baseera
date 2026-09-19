@@ -8,6 +8,8 @@ namespace Baseera.Core.KnowledgeResolution.Models
 
         public Guid? CandidateEntityId { get; init; }
 
+        public ResolutionType? ResolutionType { get; init; }
+
         public double Confidence { get; init; }
 
         public string? Reason { get; init; }

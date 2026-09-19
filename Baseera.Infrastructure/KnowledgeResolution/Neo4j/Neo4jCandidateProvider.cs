@@ -1,8 +1,8 @@
-﻿using Baseera.Core.Documents.Enums;
-using Baseera.Core.KnowledgeExtraction.Models;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Core.KnowledgeResolution.Abstracts;
 using Baseera.Core.KnowledgeResolution.Enums;
 using Baseera.Core.KnowledgeResolution.Models;
+using Baseera.Domain.Enums;
 using Baseera.Infrastructure.Options;
 using Microsoft.Extensions.Options;
 

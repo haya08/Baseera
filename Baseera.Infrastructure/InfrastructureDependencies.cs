@@ -1,6 +1,8 @@
 ﻿using Baseera.Core.KnowledgeExtraction.Abstracts;
+using Baseera.Core.KnowledgePersistence.Abstracts;
 using Baseera.Core.KnowledgeResolution.Abstracts;
 using Baseera.Infrastructure.KnowledgeExtraction.Gemini;
+using Baseera.Infrastructure.KnowledgePersistence.Neo4j;
 using Baseera.Infrastructure.KnowledgeResolution.Gemini;
 using Baseera.Infrastructure.KnowledgeResolution.Neo4j;
 using Baseera.Infrastructure.Options;
@@ -61,6 +63,8 @@ namespace Baseera.Infrastructure
             services.AddScoped<ICandidateProvider, Neo4jCandidateProvider>();
 
             services.AddScoped<IResolutionJudge, GeminiResolutionJudge>();
+
+            services.AddScoped<IKnowledgeRepository, Neo4jKnowledgeRepository>();
 
             return services;
         }

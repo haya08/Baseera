@@ -8,7 +8,7 @@
 
         public string NormalizedName { get; set; } = null!;
 
-        public string Embedding { get; set; } = null!;
+        public IReadOnlyList<double> Embedding { get; set; } = [];
 
         public string? Description { get; set; }
 

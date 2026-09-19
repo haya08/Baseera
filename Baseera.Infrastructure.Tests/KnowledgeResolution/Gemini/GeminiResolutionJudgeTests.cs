@@ -1,7 +1,7 @@
-﻿using Baseera.Core.Documents.Enums;
-using Baseera.Core.KnowledgeExtraction.Models;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Core.KnowledgeResolution.Enums;
 using Baseera.Core.KnowledgeResolution.Models;
+using Baseera.Domain.Enums;
 using Baseera.Infrastructure.KnowledgeResolution.Gemini;
 using Baseera.Infrastructure.Options;
 using Baseera.Infrastructure.Tests.TestSetups;

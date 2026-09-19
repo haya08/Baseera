@@ -1,13 +1,14 @@
-﻿namespace Baseera.Infrastructure.KnowledgeResolution.Gemini.Models
+﻿namespace Baseera.Infrastructure.KnowledgeResolution.Gemini.Models;
+
+internal sealed class GeminiResolutionDecision
 {
-    internal sealed class GeminiResolutionDecision
-    {
-        public string Decision { get; init; } = null!;
+    public string Decision { get; init; } = null!;
 
-        public string? CandidateEntityId { get; init; }
+    public string? CandidateEntityId { get; init; }
 
-        public double Confidence { get; init; }
+    public string? ResolutionType { get; init; }
 
-        public string? Reason { get; init; }
-    }
+    public double Confidence { get; init; }
+
+    public string? Reason { get; init; }
 }
