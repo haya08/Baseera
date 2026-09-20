@@ -5,7 +5,7 @@ namespace Baseera.Core.KnowledgeResolution.Abstracts
 {
     public interface IResolutionJudge
     {
-        Task<ResolutionCandidate?> JudgeAsync(
+        Task<ResolutionDecision> JudgeAsync(
             ExtractedEntity entity,
             IReadOnlyList<ResolutionCandidate> candidates,
             CancellationToken cancellationToken = default);

@@ -1,4 +1,4 @@
-﻿using Baseera.Core.Documents.Enums;
+﻿using Baseera.Domain.Enums;
 
 namespace Baseera.Core.KnowledgeResolution.Models
 {

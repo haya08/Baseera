@@ -1,20 +1,8 @@
 ﻿using Baseera.Core.KnowledgeExtraction.Abstracts;
+using Baseera.Core.KnowledgePersistence.Abstracts;
 using Baseera.Core.KnowledgeResolution.Abstracts;
-using Baseera.Infrastructure.KnowledgeExtraction.Gemini;
-using Baseera.Infrastructure.KnowledgeResolution.Gemini;
-using Baseera.Infrastructure.KnowledgeResolution.Neo4j;
-using Google.GenAI;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Neo4j.Driver;
-using Baseera.Infrastructure.Connectors.Reddit;
+using Baseera.Infrastructure.Auth.Meta;
 using Baseera.Infrastructure.Connectors.Abstractions;
-using Baseera.Infrastructure.Connectors.Reddit.Abstractions;
-using Baseera.Infrastructure.Connectors.Reddit.Clients;
-using Baseera.Infrastructure.Connectors.Reddit.Mappers;
-using Baseera.Infrastructure.Connectors.Mastodon;
-using Baseera.Infrastructure.Connectors.Mastodon.Mappers;
 using Baseera.Infrastructure.Connectors.Bluesky;
 using Baseera.Infrastructure.Connectors.Bluesky.Mappers;
 using Baseera.Infrastructure.Connectors.Facebook;
@@ -24,9 +12,23 @@ using Baseera.Infrastructure.Connectors.Facebook.Mappers;
 using Baseera.Infrastructure.Connectors.Instagram;
 using Baseera.Infrastructure.Connectors.Instagram.Abstractions;
 using Baseera.Infrastructure.Connectors.Instagram.Clients;
-using Microsoft.Extensions.Options;
 using Baseera.Infrastructure.Connectors.Instagram.Mappers;
-using Baseera.Infrastructure.Auth.Meta;
+using Baseera.Infrastructure.Connectors.Mastodon;
+using Baseera.Infrastructure.Connectors.Mastodon.Mappers;
+using Baseera.Infrastructure.Connectors.Reddit;
+using Baseera.Infrastructure.Connectors.Reddit.Abstractions;
+using Baseera.Infrastructure.Connectors.Reddit.Clients;
+using Baseera.Infrastructure.Connectors.Reddit.Mappers;
+using Baseera.Infrastructure.KnowledgeExtraction.Gemini;
+using Baseera.Infrastructure.KnowledgePersistence.Neo4j;
+using Baseera.Infrastructure.KnowledgeResolution.Gemini;
+using Baseera.Infrastructure.KnowledgeResolution.Neo4j;
+using Baseera.Infrastructure.Options;
+using Google.GenAI;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Neo4j.Driver;
 
 namespace Baseera.Infrastructure
 {
@@ -75,8 +77,8 @@ namespace Baseera.Infrastructure
             });
 
 
-           services.Configure<FacebookApiOptions>(
-                configuration.GetSection("FacebookApi"));
+            services.Configure<FacebookApiOptions>(
+                 configuration.GetSection("FacebookApi"));
 
             services.AddHttpClient<FacebookApiClient>((sp, client) =>
             {
@@ -98,26 +100,26 @@ namespace Baseera.Infrastructure
             services.Configure<InstagramApiOptions>(
     configuration.GetSection("InstagramApi"));
 
-services.AddHttpClient<IInstagramApiClient, InstagramApiClient>(
-    (serviceProvider, client) =>
-    {
-        var options =
-            serviceProvider
-                .GetRequiredService<
-                    IOptions<InstagramApiOptions>>()
-                .Value;
+            services.AddHttpClient<IInstagramApiClient, InstagramApiClient>(
+                (serviceProvider, client) =>
+                {
+                    var options =
+                        serviceProvider
+                            .GetRequiredService<
+                                IOptions<InstagramApiOptions>>()
+                            .Value;
 
-        client.BaseAddress = new Uri(
-            $"{options.BaseUrl.TrimEnd('/')}/");
-    });
+                    client.BaseAddress = new Uri(
+                        $"{options.BaseUrl.TrimEnd('/')}/");
+                });
 
-    services.Configure<MetaOAuthOptions>(
-    configuration.GetSection("MetaOAuth"));
+            services.Configure<MetaOAuthOptions>(
+            configuration.GetSection("MetaOAuth"));
 
-services.AddHttpClient<IMetaOAuthService, MetaOAuthService>();
+            services.AddHttpClient<IMetaOAuthService, MetaOAuthService>();
 
-services.AddScoped<InstagramMapper>();
-services.AddScoped<InstagramConnector>();
+            services.AddScoped<InstagramMapper>();
+            services.AddScoped<InstagramConnector>();
 
 
 
@@ -149,6 +151,8 @@ services.AddScoped<InstagramConnector>();
 
             services.AddScoped<IResolutionJudge, GeminiResolutionJudge>();
 
+            services.AddScoped<IKnowledgeRepository, Neo4jKnowledgeRepository>();
+
             services.AddScoped<IRedditMapper, RedditMapper>();
 
             services.AddScoped<IConnector, RedditConnector>();
@@ -164,7 +168,7 @@ services.AddScoped<InstagramConnector>();
                     new Uri("https://public.api.bsky.app");
             });
 
-            
+
             return services;
         }
     }

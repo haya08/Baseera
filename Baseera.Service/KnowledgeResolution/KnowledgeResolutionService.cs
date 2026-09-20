@@ -1,8 +1,8 @@
-﻿using Baseera.Core.Documents.Enums;
-using Baseera.Core.KnowledgeExtraction.Models;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Core.KnowledgeResolution.Abstracts;
 using Baseera.Core.KnowledgeResolution.Enums;
 using Baseera.Core.KnowledgeResolution.Models;
+using Baseera.Domain.Enums;
 
 namespace Baseera.Service.KnowledgeResolution
 {
@@ -59,14 +59,7 @@ namespace Baseera.Service.KnowledgeResolution
 
             if (candidates.Count == 0)
             {
-                return new ResolvedEntity
-                {
-                    ExtractedEntityId = entity.Id,
-                    ResolvedEntityId = Guid.NewGuid(),
-                    Type = entity.Type,
-                    Status = ResolutionStatus.New,
-                    Candidates = []
-                };
+                return CreateNewEntity(entity);
             }
 
             var exactCandidate = candidates
@@ -75,14 +68,12 @@ namespace Baseera.Service.KnowledgeResolution
 
             if (exactCandidate is not null)
             {
-                return new ResolvedEntity
-                {
-                    ExtractedEntityId = entity.Id,
-                    ResolvedEntityId = exactCandidate.EntityId,
-                    Type = entity.Type,
-                    Status = ResolutionStatus.Resolved,
-                    Candidates = candidates
-                };
+                return CreateResolvedEntity(
+                    entity,
+                    exactCandidate,
+                    candidates,
+                    ResolutionType.ExactMatch,
+                    ResolutionSource.ExactMatch);
             }
 
             var aliasCandidate = candidates
@@ -91,40 +82,37 @@ namespace Baseera.Service.KnowledgeResolution
 
             if (aliasCandidate is not null)
             {
-                return new ResolvedEntity
-                {
-                    ExtractedEntityId = entity.Id,
-                    ResolvedEntityId = aliasCandidate.EntityId,
-                    Type = entity.Type,
-                    Status = ResolutionStatus.Resolved,
-                    Candidates = candidates
-                };
+                return CreateResolvedEntity(
+                    entity,
+                    aliasCandidate,
+                    candidates,
+                    ResolutionType.AliasMatch,
+                    ResolutionSource.ExistingAlias);
             }
 
-            var judgedCandidate = await _resolutionJudge.JudgeAsync(
+            var decision = await _resolutionJudge.JudgeAsync(
                 entity,
                 candidates,
                 cancellationToken);
 
-            if (judgedCandidate is not null)
+            return decision.Decision switch
             {
-                return new ResolvedEntity
-                {
-                    ExtractedEntityId = entity.Id,
-                    ResolvedEntityId = judgedCandidate.EntityId,
-                    Type = entity.Type,
-                    Status = ResolutionStatus.Resolved,
-                    Candidates = candidates
-                };
-            }
+                ResolutionDecisionType.Match =>
+                    CreateResolvedEntityFromDecision(
+                        entity,
+                        decision,
+                        candidates),
 
-            return new ResolvedEntity
-            {
-                ExtractedEntityId = entity.Id,
-                ResolvedEntityId = null,
-                Type = entity.Type,
-                Status = ResolutionStatus.Ambiguous,
-                Candidates = candidates
+                ResolutionDecisionType.NoMatch =>
+                    CreateNewEntity(entity),
+
+                ResolutionDecisionType.Ambiguous =>
+                    CreateAmbiguousEntity(
+                        entity,
+                        candidates),
+
+                _ => throw new InvalidOperationException(
+                    $"Unsupported resolution decision: {decision.Decision}")
             };
         }
 
@@ -227,8 +215,10 @@ namespace Baseera.Service.KnowledgeResolution
                     targetType == EntityType.Feature,
 
                 RelationshipType.HasTopic =>
-                    sourceType == EntityType.Brand &&
-                    targetType == EntityType.Topic,
+                    (sourceType == EntityType.Brand &&
+                    targetType == EntityType.Topic) ||
+                    (sourceType == EntityType.Product &&
+                    targetType == EntityType.Topic),
 
                 RelationshipType.RunsCampaign =>
                     sourceType == EntityType.Brand &&
@@ -245,5 +235,113 @@ namespace Baseera.Service.KnowledgeResolution
                 _ => false
             };
         }
+
+
+        private static ResolvedEntity CreateNewEntity(
+            ExtractedEntity entity)
+        {
+            return new ResolvedEntity
+            {
+                ExtractedEntityId = entity.Id,
+
+                ResolvedEntityId = Guid.NewGuid(),
+
+                Type = entity.Type,
+
+                Status = ResolutionStatus.New,
+
+                ResolutionType = null,
+
+                ResolutionSource = null,
+
+                Candidates = []
+            };
+        }
+
+
+        private static ResolvedEntity CreateResolvedEntity(
+            ExtractedEntity entity,
+            ResolutionCandidate candidate,
+            IReadOnlyList<ResolutionCandidate> candidates,
+            ResolutionType resolutionType,
+            ResolutionSource resolutionSource)
+        {
+            return new ResolvedEntity
+            {
+                ExtractedEntityId = entity.Id,
+
+                ResolvedEntityId = candidate.EntityId,
+
+                Type = entity.Type,
+
+                Status = ResolutionStatus.Resolved,
+
+                ResolutionType = resolutionType,
+
+                ResolutionSource = resolutionSource,
+
+                Candidates = candidates
+            };
+        }
+
+
+        private static ResolvedEntity CreateResolvedEntityFromDecision(
+            ExtractedEntity entity,
+            ResolutionDecision decision,
+            IReadOnlyList<ResolutionCandidate> candidates)
+        {
+            if (decision.CandidateEntityId is null)
+            {
+                throw new InvalidOperationException(
+                    "Match decision must contain a candidate ID.");
+            }
+
+            if (decision.ResolutionType is null)
+            {
+                throw new InvalidOperationException(
+                    "Match decision must contain a resolution type.");
+            }
+
+            var candidate = candidates.FirstOrDefault(
+                c => c.EntityId == decision.CandidateEntityId.Value);
+
+            if (candidate is null)
+            {
+                throw new InvalidOperationException(
+                    "Selected candidate was not found.");
+            }
+
+            return CreateResolvedEntity(
+                entity,
+                candidate,
+                candidates,
+                decision.ResolutionType.Value,
+                ResolutionSource.Gemini);
+        }
+
+
+        private static ResolvedEntity CreateAmbiguousEntity(
+            ExtractedEntity entity,
+            IReadOnlyList<ResolutionCandidate> candidates)
+        {
+            return new ResolvedEntity
+            {
+                ExtractedEntityId = entity.Id,
+
+                ResolvedEntityId = null,
+
+                Type = entity.Type,
+
+                Status = ResolutionStatus.Ambiguous,
+
+                ResolutionType = null,
+
+                ResolutionSource = ResolutionSource.Gemini,
+
+                Candidates = candidates
+            };
+        }
+
+
     }
 }

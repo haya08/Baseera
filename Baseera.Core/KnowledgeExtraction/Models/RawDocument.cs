@@ -2,9 +2,9 @@
 
 namespace Baseera.Core.Documents.Models
 {
-    public sealed class RawDocument
+    public sealed class RawDocument // post
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } // 001
 
         // Identifier from the original source
         public string ExternalId { get; set; } = null!;
@@ -34,7 +34,7 @@ namespace Baseera.Core.Documents.Models
         public DateTimeOffset CollectedAt { get; set; }
 
         // Detected/provided language
-        public string? Language { get; set; }
+        //public string? Language { get; set; }
 
         // Source-specific information
         public Dictionary<string, object>? Metadata { get; set; }

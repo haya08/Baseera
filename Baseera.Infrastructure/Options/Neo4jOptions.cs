@@ -1,4 +1,4 @@
-﻿namespace Baseera.Infrastructure.KnowledgeResolution.Neo4j
+﻿namespace Baseera.Infrastructure.Options
 {
     public class Neo4jOptions
     {

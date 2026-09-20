@@ -1,4 +1,4 @@
-﻿namespace Baseera.Core.Documents.Enums
+﻿namespace Baseera.Domain.Enums
 {
     public enum EntityType
     {

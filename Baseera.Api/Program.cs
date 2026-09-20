@@ -1,4 +1,5 @@
 using Baseera.Infrastructure;
+using Baseera.Service;
 using System.Text.Json.Serialization;
 using Baseera.Infrastructure.Auth.Meta;
 
@@ -36,8 +37,8 @@ builder.Services.AddSwaggerGen();
 
 #region Dependency Injection
 
-builder.Services.AddInfrastructureDependencies(
-    builder.Configuration);
+builder.Services.AddInfrastructureDependencies(builder.Configuration)
+                .AddServiceDependencies(builder.Configuration);
 
 #endregion
 
