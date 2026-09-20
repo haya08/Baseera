@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Baseera.Infrastructure.Connectors.Facebook.ApiModels;
 using Microsoft.Extensions.Options;
+using Baseera.Infrastructure.Auth.Meta;
 
 namespace Baseera.Infrastructure.Connectors.Facebook.Clients;
 
@@ -8,22 +9,28 @@ public sealed class FacebookApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly FacebookApiOptions _options;
+    private readonly IMetaConnectionAccessor _connectionAccessor;
 
     public FacebookApiClient(
         HttpClient httpClient,
-        IOptions<FacebookApiOptions> options)
+        IOptions<FacebookApiOptions> options,
+        IMetaConnectionAccessor connectionAccessor)
     {
         _httpClient = httpClient;
         _options = options.Value;
+        _connectionAccessor = connectionAccessor;
     }
 
     public async Task<FacebookManagedPagesResponse> GetManagedPagesAsync(
         CancellationToken cancellationToken = default)
     {
+
+        var connection = _connectionAccessor.GetConnection();
+
         var endpoint =
-            $"/{_options.ApiVersion}/me/accounts" +
-            "?fields=id,name,link,access_token" +
-            $"&access_token={Uri.EscapeDataString(_options.UserAccessToken)}";
+        $"/{_options.ApiVersion}/me/accounts" +
+        "?fields=id,name,link,access_token" +
+        $"&access_token={Uri.EscapeDataString(connection.UserAccessToken)}";
 
         using var request = new HttpRequestMessage(
             HttpMethod.Get,

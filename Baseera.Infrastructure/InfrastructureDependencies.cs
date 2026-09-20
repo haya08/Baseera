@@ -26,6 +26,7 @@ using Baseera.Infrastructure.Connectors.Instagram.Abstractions;
 using Baseera.Infrastructure.Connectors.Instagram.Clients;
 using Microsoft.Extensions.Options;
 using Baseera.Infrastructure.Connectors.Instagram.Mappers;
+using Baseera.Infrastructure.Auth.Meta;
 
 namespace Baseera.Infrastructure
 {
@@ -89,6 +90,10 @@ namespace Baseera.Infrastructure
             services.AddScoped<IFacebookMapper, FacebookMapper>();
             services.AddScoped<FacebookConnector>();
 
+            services.AddHttpContextAccessor();
+
+            services.AddScoped<IMetaConnectionAccessor, MetaConnectionAccessor>();
+
 
             services.Configure<InstagramApiOptions>(
     configuration.GetSection("InstagramApi"));
@@ -105,6 +110,11 @@ services.AddHttpClient<IInstagramApiClient, InstagramApiClient>(
         client.BaseAddress = new Uri(
             $"{options.BaseUrl.TrimEnd('/')}/");
     });
+
+    services.Configure<MetaOAuthOptions>(
+    configuration.GetSection("MetaOAuth"));
+
+services.AddHttpClient<IMetaOAuthService, MetaOAuthService>();
 
 services.AddScoped<InstagramMapper>();
 services.AddScoped<InstagramConnector>();

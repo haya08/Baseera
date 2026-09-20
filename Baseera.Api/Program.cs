@@ -1,5 +1,6 @@
 using Baseera.Infrastructure;
 using System.Text.Json.Serialization;
+using Baseera.Infrastructure.Auth.Meta;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +21,18 @@ DotNetEnv.Env.Load(
 
 builder.Services.AddControllers();
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddMemoryCache();
+builder.Services.AddSession();
+
+builder.Services.Configure<MetaOAuthOptions>(
+    builder.Configuration.GetSection("MetaOAuth"));
+
+builder.Services.AddHttpClient<IMetaOAuthService, MetaOAuthService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 #region Dependency Injection
 
@@ -48,6 +59,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseSession();
 
 app.UseAuthorization();
 

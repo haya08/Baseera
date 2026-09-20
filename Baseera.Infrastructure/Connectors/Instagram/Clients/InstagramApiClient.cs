@@ -3,6 +3,7 @@ using System.Text.Json;
 using Baseera.Infrastructure.Connectors.Instagram.Abstractions;
 using Baseera.Infrastructure.Connectors.Instagram.ApiModels;
 using Microsoft.Extensions.Options;
+using Baseera.Infrastructure.Auth.Meta;
 
 namespace Baseera.Infrastructure.Connectors.Instagram.Clients;
 
@@ -10,35 +11,40 @@ public sealed class InstagramApiClient : IInstagramApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly InstagramApiOptions _options;
+    private readonly IMetaConnectionAccessor _connectionAccessor;
 
     private static readonly JsonSerializerOptions JsonOptions =
         new(JsonSerializerDefaults.Web);
 
     public InstagramApiClient(
-        HttpClient httpClient,
-        IOptions<InstagramApiOptions> options)
+    HttpClient httpClient,
+    IOptions<InstagramApiOptions> options,
+    IMetaConnectionAccessor connectionAccessor)
     {
-        _httpClient = httpClient;
-        _options = options.Value;
+    _httpClient = httpClient;
+    _options = options.Value;
+    _connectionAccessor = connectionAccessor;
     }
 
     public async Task<IReadOnlyList<InstagramMedia>> GetAllMediaAsync(
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(
-            _options.InstagramBusinessAccountId);
+        var connection = _connectionAccessor.GetInstagramConnection();
 
         ArgumentException.ThrowIfNullOrWhiteSpace(
-            _options.PageAccessToken);
+            connection.InstagramBusinessAccountId);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            connection.PageAccessToken);
 
         var fields =
             "id,caption,media_type,media_url,permalink,timestamp,thumbnail_url,like_count,comments_count";
 
         var url =
             $"{_options.ApiVersion}/" +
-            $"{_options.InstagramBusinessAccountId}/media" +
+            $"{connection.InstagramBusinessAccountId}/media" +
             $"?fields={Uri.EscapeDataString(fields)}" +
-            $"&access_token={Uri.EscapeDataString(_options.PageAccessToken)}";
+            $"&access_token={Uri.EscapeDataString(connection.PageAccessToken)}";
 
         var result = new List<InstagramMedia>();
 
@@ -80,15 +86,17 @@ public sealed class InstagramApiClient : IInstagramApiClient
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(mediaId);
 
+        var connection = _connectionAccessor.GetInstagramConnection();
+
         ArgumentException.ThrowIfNullOrWhiteSpace(
-            _options.PageAccessToken);
+            connection.PageAccessToken);
 
         var fields = "id,text,username,timestamp";
 
         var url =
             $"{_options.ApiVersion}/{mediaId}/comments" +
             $"?fields={Uri.EscapeDataString(fields)}" +
-            $"&access_token={Uri.EscapeDataString(_options.PageAccessToken)}";
+            $"&access_token={Uri.EscapeDataString(connection.PageAccessToken)}";
 
         var result = new List<InstagramComment>();
 
