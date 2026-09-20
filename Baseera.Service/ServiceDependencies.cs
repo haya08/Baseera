@@ -1,5 +1,7 @@
-﻿using Baseera.Core.KnowledgePipeline.Abstracts;
+﻿using Baseera.Core.KnowledgePersistence.Abstracts;
+using Baseera.Core.KnowledgePipeline.Abstracts;
 using Baseera.Core.KnowledgeResolution.Abstracts;
+using Baseera.Service.KnowledgePersistence;
 using Baseera.Service.KnowledgePipeline;
 using Baseera.Service.KnowledgeResolution;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +18,8 @@ namespace Baseera.Service
             services.AddScoped<IKnowledgeResolver, KnowledgeResolutionService>();
 
             services.AddScoped<IKnowledgePipeline, KnowledgePipelineService>();
+
+            services.AddScoped<IKnowledgePersistenceService, KnowledgePersistenceService>();
 
             return services;
         }
