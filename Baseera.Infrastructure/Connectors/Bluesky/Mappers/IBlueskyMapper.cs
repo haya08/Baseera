@@ -1,4 +1,4 @@
-using Baseera.Infrastructure.Connectors.Documents;
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Infrastructure.Connectors.Bluesky.ApiModels;
 
 namespace Baseera.Infrastructure.Connectors.Bluesky.Mappers;

@@ -1,6 +1,6 @@
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Domain.Enums;
 using Baseera.Infrastructure.Connectors.Abstractions;
-using Baseera.Infrastructure.Connectors.Documents;
 using Baseera.Infrastructure.Connectors.Instagram.Abstractions;
 using Baseera.Infrastructure.Connectors.Instagram.Mappers;
 

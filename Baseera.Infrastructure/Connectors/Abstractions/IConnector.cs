@@ -1,16 +1,15 @@
-﻿using Baseera.Domain.Entities;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Domain.Enums;
-using Baseera.Infrastructure.Connectors.Documents;
 
 namespace Baseera.Infrastructure.Connectors.Abstractions
 {
     public interface IConnector
     {
-    Platform Platform { get; }
+        Platform Platform { get; }
 
-    Task<IReadOnlyList<UnifiedRawDocument>> GetDocumentsAsync(
-        string url,
-        CancellationToken cancellationToken = default);
-}
+        Task<IReadOnlyList<UnifiedRawDocument>> GetDocumentsAsync(
+            string url,
+            CancellationToken cancellationToken = default);
+    }
 
 }

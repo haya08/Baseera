@@ -1,8 +1,8 @@
-using System.Text.Json;
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Domain.Enums;
-using Baseera.Infrastructure.Connectors.Documents;
 using Baseera.Infrastructure.Connectors.Instagram.ApiModels;
 using System.Globalization;
+using System.Text.Json;
 
 namespace Baseera.Infrastructure.Connectors.Instagram.Mappers;
 
@@ -84,7 +84,7 @@ public sealed class InstagramMapper
         return metadata;
     }
 
-        private static DateTimeOffset ParseInstagramDate(string? value)
+    private static DateTimeOffset ParseInstagramDate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new FormatException("Instagram timestamp is missing.");

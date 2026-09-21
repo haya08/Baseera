@@ -5,7 +5,7 @@ namespace Baseera.Core.KnowledgeExtraction.Abstracts
     public interface IKnowledgeExtractor
     {
         Task<KnowledgeExtractionResult> ExtractAsync(
-            string text,
+            UnifiedRawDocument document,
             CancellationToken cancellationToken = default);
     }
 }

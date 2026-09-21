@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Connectors\Documents\**" />
+    <EmbeddedResource Remove="Connectors\Documents\**" />
+    <None Remove="Connectors\Documents\**" />
+  </ItemGroup>
+
+  <ItemGroup>
   <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 

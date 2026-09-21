@@ -1,4 +1,4 @@
-using Baseera.Infrastructure.Connectors.Documents;
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Infrastructure.Connectors.Mastodon.ApiModels;
 
 namespace Baseera.Infrastructure.Connectors.Mastodon.Mappers;

@@ -23,15 +23,12 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
     }
 
     public async Task<KnowledgeExtractionResult> ExtractAsync(
-        string text,
+        UnifiedRawDocument document,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            throw new ArgumentException(
-                "Text cannot be empty.",
-                nameof(text));
-        }
+        ArgumentNullException.ThrowIfNull(document);
+
+        var text = BuildExtractionText(document);
 
         var config = new GenerateContentConfig
         {
@@ -80,6 +77,39 @@ public sealed class GeminiKnowledgeExtractor : IKnowledgeExtractor
         return result
             ?? throw new InvalidOperationException(
                 "Gemini returned an empty knowledge extraction result.");
+    }
+
+
+    private static string BuildExtractionText(
+    UnifiedRawDocument document)
+    {
+        var parts = new List<string>();
+
+        parts.Add($"Platform: {document.Platform}");
+
+        if (!string.IsNullOrWhiteSpace(document.Author))
+            parts.Add($"Author: {document.Author}");
+
+        if (!string.IsNullOrWhiteSpace(document.Title))
+            parts.Add($"Title: {document.Title}");
+
+        if (!string.IsNullOrWhiteSpace(document.Body))
+            parts.Add($"Body: {document.Body}");
+
+        if (document.Comments.Count > 0)
+        {
+            parts.Add("Comments:");
+
+            foreach (var comment in document.Comments)
+            {
+                parts.Add(
+                    $"- {comment.Author}: {comment.Body}");
+            }
+        }
+
+        return string.Join(
+            System.Environment.NewLine,
+            parts);
     }
 
     private static Schema BuildResponseSchema()

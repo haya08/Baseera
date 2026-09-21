@@ -1,5 +1,5 @@
-﻿using Baseera.Domain.Enums;
-using Baseera.Infrastructure.Connectors.Documents;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
+using Baseera.Domain.Enums;
 using Baseera.Infrastructure.Connectors.Reddit.Abstractions;
 using Baseera.Infrastructure.Connectors.Reddit.ApiModels.Comment;
 using Baseera.Infrastructure.Connectors.Reddit.ApiModels.Post;

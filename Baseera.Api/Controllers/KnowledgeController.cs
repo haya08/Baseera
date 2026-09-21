@@ -1,4 +1,5 @@
-﻿using Baseera.Core.KnowledgePipeline.Abstracts;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
+using Baseera.Core.KnowledgePipeline.Abstracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Baseera.Api.Controllers
@@ -17,12 +18,12 @@ namespace Baseera.Api.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Process(
-            string text,
+            UnifiedRawDocument document,
             CancellationToken cancellationToken)
         {
             var result =
                 await _pipeline.ProcessAsync(
-                    text,
+                    document,
                     cancellationToken);
 
             return Ok(result);

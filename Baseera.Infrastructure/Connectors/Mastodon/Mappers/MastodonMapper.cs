@@ -1,7 +1,7 @@
-using System.Text.Json;
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Domain.Enums;
-using Baseera.Infrastructure.Connectors.Documents;
 using Baseera.Infrastructure.Connectors.Mastodon.ApiModels;
+using System.Text.Json;
 
 namespace Baseera.Infrastructure.Connectors.Mastodon.Mappers;
 

@@ -1,9 +1,9 @@
-using System.Text.Json;
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Domain.Enums;
 using Baseera.Infrastructure.Connectors.Abstractions;
-using Baseera.Infrastructure.Connectors.Documents;
 using Baseera.Infrastructure.Connectors.Bluesky.ApiModels;
 using Baseera.Infrastructure.Connectors.Bluesky.Mappers;
+using System.Text.Json;
 
 namespace Baseera.Infrastructure.Connectors.Bluesky;
 

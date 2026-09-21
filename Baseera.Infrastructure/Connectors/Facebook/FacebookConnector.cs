@@ -1,9 +1,9 @@
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Domain.Enums;
 using Baseera.Infrastructure.Connectors.Abstractions;
-using Baseera.Infrastructure.Connectors.Documents;
 using Baseera.Infrastructure.Connectors.Facebook.Abstractions;
-using Baseera.Infrastructure.Connectors.Facebook.Clients;
 using Baseera.Infrastructure.Connectors.Facebook.ApiModels;
+using Baseera.Infrastructure.Connectors.Facebook.Clients;
 
 namespace Baseera.Infrastructure.Connectors.Facebook;
 

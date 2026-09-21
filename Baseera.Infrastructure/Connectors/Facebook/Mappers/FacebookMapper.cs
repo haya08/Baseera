@@ -1,8 +1,8 @@
-using System.Text.Json;
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Domain.Enums;
-using Baseera.Infrastructure.Connectors.Documents;
 using Baseera.Infrastructure.Connectors.Facebook.Abstractions;
 using Baseera.Infrastructure.Connectors.Facebook.ApiModels;
+using System.Text.Json;
 
 namespace Baseera.Infrastructure.Connectors.Facebook.Mappers;
 
@@ -38,7 +38,7 @@ public sealed class FacebookMapper : IFacebookMapper
         };
     }
 
-    
+
     private static IReadOnlyDictionary<string, string> BuildMetadata(
         FacebookPost post)
     {

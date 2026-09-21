@@ -1,4 +1,5 @@
 ﻿using Baseera.Core.KnowledgeExtraction.Abstracts;
+using Baseera.Core.KnowledgeExtraction.Models;
 using Baseera.Core.KnowledgePersistence.Abstracts;
 using Baseera.Core.KnowledgePipeline.Abstracts;
 using Baseera.Core.KnowledgeResolution.Abstracts;
@@ -23,25 +24,18 @@ namespace Baseera.Service.KnowledgePipeline
         }
 
         public async Task<ResolvedKnowledge> ProcessAsync(
-            string text,
+            UnifiedRawDocument document,
             CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                throw new ArgumentException(
-                    "Text cannot be empty.",
-                    nameof(text));
-            }
+            ArgumentNullException.ThrowIfNull(document);
 
-            var extractionResult =
-                await _extractor.ExtractAsync(
-                    text,
-                    cancellationToken);
+            var extractionResult = await _extractor.ExtractAsync(
+                document,
+                cancellationToken);
 
-            var resolvedKnowledge =
-                await _resolver.ResolveAsync(
-                    extractionResult,
-                    cancellationToken);
+            var resolvedKnowledge = await _resolver.ResolveAsync(
+                extractionResult,
+                cancellationToken);
 
             await _persistenceService.PersistAsync(
                 extractionResult,

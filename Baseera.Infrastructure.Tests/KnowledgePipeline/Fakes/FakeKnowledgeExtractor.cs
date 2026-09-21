@@ -11,11 +11,14 @@ internal sealed class FakeKnowledgeExtractor : IKnowledgeExtractor
 
     public Exception? ExceptionToThrow { get; set; }
 
+    public UnifiedRawDocument? ReceivedDocument { get; private set; }
+
     public Task<KnowledgeExtractionResult> ExtractAsync(
-        string text,
+        UnifiedRawDocument document,
         CancellationToken cancellationToken = default)
     {
         WasCalled = true;
+        ReceivedDocument = document;
 
         if (ExceptionToThrow is not null)
             throw ExceptionToThrow;

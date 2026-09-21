@@ -1,11 +1,12 @@
-﻿using Baseera.Core.KnowledgeResolution.Models;
+﻿using Baseera.Core.KnowledgeExtraction.Models;
+using Baseera.Core.KnowledgeResolution.Models;
 
 namespace Baseera.Core.KnowledgePipeline.Abstracts
 {
     public interface IKnowledgePipeline
     {
         Task<ResolvedKnowledge> ProcessAsync(
-            string text,
+            UnifiedRawDocument document,
             CancellationToken cancellationToken = default);
     }
 }
