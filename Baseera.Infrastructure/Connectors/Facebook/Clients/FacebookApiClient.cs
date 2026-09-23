@@ -1,7 +1,7 @@
-using System.Text.Json;
+using Baseera.Infrastructure.Auth.Meta;
 using Baseera.Infrastructure.Connectors.Facebook.ApiModels;
 using Microsoft.Extensions.Options;
-using Baseera.Infrastructure.Auth.Meta;
+using System.Text.Json;
 
 namespace Baseera.Infrastructure.Connectors.Facebook.Clients;
 
@@ -28,9 +28,9 @@ public sealed class FacebookApiClient
         var connection = _connectionAccessor.GetConnection();
 
         var endpoint =
-        $"/{_options.ApiVersion}/me/accounts" +
-        "?fields=id,name,link,access_token" +
-        $"&access_token={Uri.EscapeDataString(connection.UserAccessToken)}";
+            $"/{_options.ApiVersion}/me/accounts" +
+            "?fields=id,name,link,access_token" +
+            $"&access_token={Uri.EscapeDataString(connection.UserAccessToken)}";
 
         using var request = new HttpRequestMessage(
             HttpMethod.Get,

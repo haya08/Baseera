@@ -1,3 +1,4 @@
+using Baseera.Core.KnowledgeIngestion;
 using Baseera.Infrastructure.Connectors.Facebook;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +9,14 @@ namespace Baseera.Api.Controllers;
 public sealed class FacebookConnectorController : ControllerBase
 {
     private readonly FacebookConnector _connector;
+    private readonly IKnowledgeIngestionService _ingestionService;
 
     public FacebookConnectorController(
-        FacebookConnector connector)
+        FacebookConnector connector,
+        IKnowledgeIngestionService ingestionService)
     {
         _connector = connector;
+        _ingestionService = ingestionService;
     }
 
     [HttpPost]
@@ -25,7 +29,12 @@ public sealed class FacebookConnectorController : ControllerBase
                 request.Url,
                 cancellationToken);
 
-        return Ok(documents);
+        var results =
+            await _ingestionService.ProcessAsync(
+                documents,
+                cancellationToken);
+
+        return Ok(results);
     }
 }
 

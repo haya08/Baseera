@@ -1,0 +1,27 @@
+﻿{
+  "externalId": "001",
+  "platform": "Reddit",
+  "title": "nike products",
+  "body": "string",
+  "comments": [
+    {
+      "externalId": "001",
+      "author": "string",
+      "body": "i have bought some pegasus shoes last month, and i really found them really soft and comfortble so very convenient for the gym or running. really love nike products",
+      "publishedAt": "2026-09-23T08:01:01.847Z",
+      "score": 0,
+      "depth": 0,
+      "parentId": "string"
+    }
+  ],
+  "author": "string",
+  "url": "string",
+  "publishedAt": "2026-09-23T08:01:01.847Z",
+  "collectedAt": "2026-09-23T08:01:01.847Z",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "rawJson": "string"
+}

@@ -114,7 +114,7 @@ namespace Baseera.Infrastructure.KnowledgePersistence.Neo4j
                 MATCH (source:Entity {id: $sourceId})
                 MATCH (target:Entity {id: $targetId})
 
-                CREATE (source)-[r:{{{relationshipType}}}]->(target)
+                MERGE (source)-[r:{{{relationshipType}}}]->(target)
 
                 SET r.id = $id,
                     r.createdAt = $createdAt,

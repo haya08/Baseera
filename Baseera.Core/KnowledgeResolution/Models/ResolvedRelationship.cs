@@ -4,7 +4,7 @@ namespace Baseera.Core.KnowledgeResolution.Models
 {
     public sealed class ResolvedRelationship
     {
-        public string ExtractedRelationshipId { get; init; } = null!;
+        //public string ExtractedRelationshipId { get; init; } = null!;
 
         public Guid SourceEntityId { get; init; }
 
