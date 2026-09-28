@@ -1,10 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Dashboard from "./pages/Dashboard";
+import DataSources from "./pages/DataSources";
 
-function DataSources() {
-  return <h1>Data Sources</h1>;
-}
 
 function CollectedData() {
   return <h1>Collected Data</h1>;
