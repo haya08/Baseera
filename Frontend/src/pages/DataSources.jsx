@@ -1,11 +1,14 @@
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Grid,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 
@@ -23,7 +26,14 @@ import { useState } from "react";
 import {
   startMetaAuth,
   checkMetaConnection,
+  collectFacebookData,
+  collectInstagramData,
 } from "../services/metaAuth";
+
+
+// =========================
+// Social Sources
+// =========================
 
 const socialSources = [
   {
@@ -41,6 +51,11 @@ const socialSources = [
     icon: <InstagramIcon sx={{ fontSize: 32 }} />,
   },
 ];
+
+
+// =========================
+// Other Sources
+// =========================
 
 const otherSources = [
   {
@@ -66,23 +81,45 @@ const otherSources = [
   },
 ];
 
+
+// =========================
+// Source Card
+// =========================
+
 function SourceCard({
   source,
   waitingForMeta = false,
   connected = false,
+  onCollect,
+  collectingSource,
 }) {
+  const isFacebook = source.name === "Facebook";
+
+  const defaultUrl = isFacebook
+    ? "https://www.facebook.com/Baseera"
+    : "https://www.instagram.com/";
+
+  const [url, setUrl] = useState(defaultUrl);
+
+  const isCollecting =
+    collectingSource === source.name.toLowerCase();
+
   return (
     <Card
       sx={{
         height: "100%",
         borderRadius: 3,
         border: "1px solid",
-        borderColor: connected ? "success.main" : "divider",
+        borderColor: connected
+          ? "success.main"
+          : "divider",
         boxShadow: "none",
         transition: "all 0.2s ease",
+
         "&:hover": {
           transform: "translateY(-3px)",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+          boxShadow:
+            "0 8px 24px rgba(0,0,0,0.08)",
           borderColor: connected
             ? "success.main"
             : "primary.light",
@@ -90,12 +127,17 @@ function SourceCard({
       }}
     >
       <CardContent sx={{ p: 3 }}>
+        {/* Header */}
         <Stack
           direction="row"
           justifyContent="space-between"
           alignItems="flex-start"
         >
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+          >
             <Box
               sx={{
                 width: 56,
@@ -116,7 +158,10 @@ function SourceCard({
             </Box>
 
             <Box>
-              <Typography variant="h6" fontWeight={700}>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+              >
                 {source.name}
               </Typography>
 
@@ -139,11 +184,15 @@ function SourceCard({
                 : "Not Connected"
             }
             size="small"
-            color={connected ? "success" : "default"}
+            color={
+              connected ? "success" : "default"
+            }
             variant="outlined"
           />
         </Stack>
 
+
+        {/* Description */}
         <Typography
           color="text.secondary"
           sx={{
@@ -155,6 +204,8 @@ function SourceCard({
           {source.description}
         </Typography>
 
+
+        {/* Waiting For Meta */}
         {waitingForMeta && !connected ? (
           <Box
             sx={{
@@ -174,7 +225,56 @@ function SourceCard({
               Connect your Meta account first
             </Typography>
           </Box>
-        ) : !waitingForMeta ? (
+        ) : connected ? (
+
+          /* Connected Source */
+          <Box sx={{ mt: 3 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label={`${source.name} URL`}
+              value={url}
+              onChange={(e) =>
+                setUrl(e.target.value)
+              }
+            />
+
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={
+                isCollecting ? (
+                  <CircularProgress
+                    size={18}
+                    color="inherit"
+                  />
+                ) : (
+                  <LinkIcon />
+                )
+              }
+              disabled={isCollecting}
+              onClick={() =>
+                onCollect(
+                  source.name.toLowerCase(),
+                  url
+                )
+              }
+              sx={{
+                mt: 2,
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              {isCollecting
+                ? "Collecting..."
+                : "Collect Data"}
+            </Button>
+          </Box>
+
+        ) : (
+
+          /* Not Connected */
           <Button
             variant="outlined"
             fullWidth
@@ -188,75 +288,142 @@ function SourceCard({
           >
             Connect
           </Button>
-        ) : null}
+        )}
       </CardContent>
     </Card>
   );
 }
 
-function DataSources() {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
 
-  const [metaConnected, setMetaConnected] = useState(false);
-  const [metaPages, setMetaPages] = useState([]);
+// =========================
+// Data Sources Page
+// =========================
+
+function DataSources() {
+  const [isConnecting, setIsConnecting] =
+    useState(false);
+
+  const [isChecking, setIsChecking] =
+    useState(false);
+
+  const [metaConnected, setMetaConnected] =
+    useState(false);
+
+  const [metaPages, setMetaPages] =
+    useState([]);
 
   const [error, setError] = useState("");
 
-  const handleConnectMeta = async () => {
-    try {
-      setIsConnecting(true);
-      setError("");
+  const [collectionMessage, setCollectionMessage] =
+    useState("");
 
-      const data = await startMetaAuth();
+  const [collectingSource, setCollectingSource] =
+    useState("");
 
-      if (!data.authorizationUrl || !data.requestId) {
-        throw new Error(
-          "Meta authorization data was not returned"
-        );
-      }
 
+  // =========================
+  // Start Meta Authentication
+  // =========================
+
+ const handleConnectMeta = async () => {
+  // Open the new window immediately from the button click
+  // so the browser does not block it as a popup.
+  const metaWindow = window.open(
+    "about:blank",
+    "_blank"
+  );
+
+  try {
+    setIsConnecting(true);
+    setError("");
+
+    const data = await startMetaAuth();
+
+    if (!data.authorizationUrl) {
+      throw new Error(
+        "Meta authorization URL was not returned"
+      );
+    }
+
+    if (data.requestId) {
       sessionStorage.setItem(
         "baseera_meta_request_id",
         data.requestId
       );
-
-      window.open(data.authorizationUrl, "_blank");
-    } catch (err) {
-      console.error(err);
-      setError("Unable to start Meta authentication.");
-    } finally {
-      setIsConnecting(false);
     }
-  };
+
+    if (metaWindow) {
+      // Navigate the newly opened window to Meta
+      metaWindow.location.href =
+        data.authorizationUrl;
+    } else {
+      // Fallback if browser blocked the popup
+      window.location.href =
+        data.authorizationUrl;
+    }
+  } catch (err) {
+    console.error(
+      "Meta authentication error:",
+      err
+    );
+
+    if (metaWindow) {
+      metaWindow.close();
+    }
+
+    setError(
+      err?.message ||
+        "Unable to start Meta authentication."
+    );
+  } finally {
+    setIsConnecting(false);
+  }
+};
+
+  // =========================
+  // Check Meta Connection
+  // =========================
 
   const handleCheckConnection = async () => {
     try {
       setIsChecking(true);
       setError("");
+      setCollectionMessage("");
 
-      const requestId = sessionStorage.getItem(
-        "baseera_meta_request_id"
-      );
+      const requestId =
+        sessionStorage.getItem(
+          "baseera_meta_request_id"
+        );
 
       if (!requestId) {
-        throw new Error("No Meta request ID found.");
+        throw new Error(
+          "No Meta request ID found."
+        );
       }
 
-      const data = await checkMetaConnection(requestId);
+      const data =
+        await checkMetaConnection(requestId);
 
       if (!data.connected) {
         setMetaConnected(false);
+        setMetaPages([]);
+
         setError(
           "Meta is not connected yet. Complete the Facebook authorization first."
         );
+
         return;
       }
 
       setMetaConnected(true);
       setMetaPages(data.pages || []);
+
+      setCollectionMessage(
+        "Meta connected successfully. Your available sources are ready."
+      );
     } catch (err) {
       console.error(err);
+
       setError(
         "Unable to check Meta connection. Please try again."
       );
@@ -265,36 +432,120 @@ function DataSources() {
     }
   };
 
+
+  // =========================
+  // Collect Data
+  // =========================
+
+  const handleCollect = async (
+    source,
+    url
+  ) => {
+    try {
+      setCollectingSource(source);
+      setError("");
+      setCollectionMessage("");
+
+      if (!url) {
+        throw new Error(
+          "Please provide a source URL."
+        );
+      }
+
+      if (source === "facebook") {
+        await collectFacebookData(url);
+
+        setCollectionMessage(
+          "Facebook data collection started successfully."
+        );
+      }
+
+      if (source === "instagram") {
+        await collectInstagramData(url);
+
+        setCollectionMessage(
+          "Instagram data collection started successfully."
+        );
+      }
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.message ||
+          `Unable to collect ${source} data.`
+      );
+    } finally {
+      setCollectingSource("");
+    }
+  };
+
+
+  // =========================
+  // Render
+  // =========================
+
   return (
     <Box>
-      {/* Page Header */}
+
+      {/* =========================
+          Page Header
+      ========================= */}
+
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
+        <Typography
+          variant="h4"
+          fontWeight={700}
+          gutterBottom
+        >
           Data Sources
         </Typography>
 
         <Typography color="text.secondary">
-          Connect your social platforms and collect data for the
-          Baseera knowledge pipeline.
+          Connect your social platforms and
+          collect data for the Baseera
+          knowledge pipeline.
         </Typography>
       </Box>
 
-      {/* Error */}
+
+      {/* =========================
+          Error Message
+      ========================= */}
+
       {error && (
-        <Typography
-          color="error"
+        <Alert
+          severity="error"
           sx={{
             mb: 3,
-            p: 2,
             borderRadius: 2,
-            bgcolor: "#ffebee",
           }}
         >
           {error}
-        </Typography>
+        </Alert>
       )}
 
-      {/* Meta Authentication */}
+
+      {/* =========================
+          Success Message
+      ========================= */}
+
+      {collectionMessage && (
+        <Alert
+          severity="success"
+          sx={{
+            mb: 3,
+            borderRadius: 2,
+          }}
+        >
+          {collectionMessage}
+        </Alert>
+      )}
+
+
+      {/* =========================
+          Meta Authentication
+      ========================= */}
+
       <Card
         sx={{
           mb: 5,
@@ -304,19 +555,40 @@ function DataSources() {
             ? "success.main"
             : "primary.main",
           boxShadow: "none",
+
           background: metaConnected
             ? "linear-gradient(135deg, rgba(46,125,50,0.06), rgba(255,255,255,1))"
             : "linear-gradient(135deg, rgba(25,118,210,0.06), rgba(255,255,255,1))",
         }}
       >
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+        <CardContent
+          sx={{
+            p: {
+              xs: 3,
+              md: 4,
+            },
+          }}
+        >
           <Stack
-            direction={{ xs: "column", md: "row" }}
+            direction={{
+              xs: "column",
+              md: "row",
+            }}
             justifyContent="space-between"
-            alignItems={{ xs: "flex-start", md: "center" }}
+            alignItems={{
+              xs: "flex-start",
+              md: "center",
+            }}
             spacing={3}
           >
-            <Stack direction="row" spacing={2} alignItems="center">
+
+            {/* Meta Info */}
+
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+            >
               <Box
                 sx={{
                   width: 64,
@@ -325,18 +597,25 @@ function DataSources() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+
                   bgcolor: metaConnected
                     ? "success.main"
                     : "primary.main",
+
                   color: "white",
                 }}
               >
                 {metaConnected ? (
-                  <CheckCircleIcon sx={{ fontSize: 34 }} />
+                  <CheckCircleIcon
+                    sx={{ fontSize: 34 }}
+                  />
                 ) : (
-                  <HubIcon sx={{ fontSize: 34 }} />
+                  <HubIcon
+                    sx={{ fontSize: 34 }}
+                  />
                 )}
               </Box>
+
 
               <Box>
                 <Stack
@@ -345,7 +624,10 @@ function DataSources() {
                   alignItems="center"
                   flexWrap="wrap"
                 >
-                  <Typography variant="h6" fontWeight={700}>
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                  >
                     Meta Account
                   </Typography>
 
@@ -357,7 +639,9 @@ function DataSources() {
                     }
                     size="small"
                     color={
-                      metaConnected ? "success" : "primary"
+                      metaConnected
+                        ? "success"
+                        : "primary"
                     }
                   />
                 </Stack>
@@ -366,12 +650,19 @@ function DataSources() {
                   color="text.secondary"
                   sx={{ mt: 0.5 }}
                 >
-                  Facebook Pages & Instagram Business
+                  Facebook Pages & Instagram
+                  Business
                 </Typography>
               </Box>
             </Stack>
 
-            <Stack direction="row" spacing={2}>
+
+            {/* Meta Actions */}
+
+            <Stack
+              direction="row"
+              spacing={2}
+            >
               {!metaConnected && (
                 <Button
                   variant="contained"
@@ -396,7 +687,9 @@ function DataSources() {
                 variant="outlined"
                 size="large"
                 startIcon={<RefreshIcon />}
-                onClick={handleCheckConnection}
+                onClick={
+                  handleCheckConnection
+                }
                 disabled={isChecking}
                 sx={{
                   borderRadius: 2,
@@ -410,6 +703,9 @@ function DataSources() {
               </Button>
             </Stack>
           </Stack>
+
+
+          {/* Meta Description */}
 
           <Box
             sx={{
@@ -431,99 +727,135 @@ function DataSources() {
         </CardContent>
       </Card>
 
-      {/* Discovered Meta Pages */}
-      {metaConnected && metaPages.length > 0 && (
-        <Box sx={{ mb: 5 }}>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="h6" fontWeight={700}>
-              Connected Meta Sources
-            </Typography>
 
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: 0.5 }}
-            >
-              Sources discovered from your Meta account.
-            </Typography>
-          </Box>
+      {/* =========================
+          Connected Meta Pages
+      ========================= */}
 
-          <Grid container spacing={3}>
-            {metaPages.map((page, index) => (
-              <Grid
-                item
-                xs={12}
-                md={6}
-                key={page.pageId || page.id || index}
+      {metaConnected &&
+        metaPages.length > 0 && (
+          <Box sx={{ mb: 5 }}>
+
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="h6"
+                fontWeight={700}
               >
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    border: "1px solid",
-                    borderColor: "success.light",
-                    boxShadow: "none",
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Stack
-                      direction="row"
-                      spacing={2}
-                      alignItems="center"
+                Connected Meta Sources
+              </Typography>
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 0.5 }}
+              >
+                Sources discovered from your
+                Meta account.
+              </Typography>
+            </Box>
+
+
+            <Grid
+              container
+              spacing={3}
+            >
+              {metaPages.map(
+                (page, index) => (
+                  <Grid
+                    item
+                    xs={12}
+                    md={6}
+                    key={
+                      page.pageId ||
+                      page.id ||
+                      index
+                    }
+                  >
+                    <Card
+                      sx={{
+                        borderRadius: 3,
+                        border: "1px solid",
+                        borderColor:
+                          "success.light",
+                        boxShadow: "none",
+                      }}
                     >
-                      <Box
-                        sx={{
-                          width: 50,
-                          height: 50,
-                          borderRadius: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          bgcolor: "success.light",
-                          color: "success.dark",
-                        }}
+                      <CardContent
+                        sx={{ p: 3 }}
                       >
-                        <FacebookIcon />
-                      </Box>
-
-                      <Box>
-                        <Typography
-                          variant="h6"
-                          fontWeight={700}
+                        <Stack
+                          direction="row"
+                          spacing={2}
+                          alignItems="center"
                         >
-                          {page.pageName ||
-                            page.name ||
-                            "Facebook Page"}
-                        </Typography>
-
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                        >
-                          Connected Meta Page
-                        </Typography>
-
-                        {page.instagramBusinessAccountId && (
-                          <Typography
-                            variant="body2"
-                            color="success.main"
-                            sx={{ mt: 0.5 }}
+                          <Box
+                            sx={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 2,
+                              display: "flex",
+                              alignItems:
+                                "center",
+                              justifyContent:
+                                "center",
+                              bgcolor:
+                                "success.light",
+                              color:
+                                "success.dark",
+                            }}
                           >
-                            Instagram Business Account connected
-                          </Typography>
-                        )}
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
+                            <FacebookIcon />
+                          </Box>
 
-      {/* Social Sources */}
+                          <Box>
+                            <Typography
+                              variant="h6"
+                              fontWeight={700}
+                            >
+                              {page.pageName ||
+                                page.name ||
+                                "Facebook Page"}
+                            </Typography>
+
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                            >
+                              Connected Meta
+                              Page
+                            </Typography>
+
+                            {page.instagramBusinessAccountId && (
+                              <Typography
+                                variant="body2"
+                                color="success.main"
+                                sx={{ mt: 0.5 }}
+                              >
+                                Instagram Business
+                                Account connected
+                              </Typography>
+                            )}
+                          </Box>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                )
+              )}
+            </Grid>
+          </Box>
+        )}
+
+
+      {/* =========================
+          Social Sources
+      ========================= */}
+
       <Box sx={{ mb: 2 }}>
-        <Typography variant="h6" fontWeight={700}>
+        <Typography
+          variant="h6"
+          fontWeight={700}
+        >
           Social Sources
         </Typography>
 
@@ -532,11 +864,17 @@ function DataSources() {
           color="text.secondary"
           sx={{ mt: 0.5 }}
         >
-          Each platform is handled by its own data connector.
+          Each platform is handled by its
+          own data connector.
         </Typography>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 5 }}>
+
+      <Grid
+        container
+        spacing={3}
+        sx={{ mb: 5 }}
+      >
         {socialSources.map((source) => (
           <Grid
             item
@@ -546,16 +884,29 @@ function DataSources() {
           >
             <SourceCard
               source={source}
-              waitingForMeta={!metaConnected}
+              waitingForMeta={
+                !metaConnected
+              }
               connected={metaConnected}
+              onCollect={handleCollect}
+              collectingSource={
+                collectingSource
+              }
             />
           </Grid>
         ))}
       </Grid>
 
-      {/* Other Sources */}
+
+      {/* =========================
+          Other Sources
+      ========================= */}
+
       <Box sx={{ mb: 2 }}>
-        <Typography variant="h6" fontWeight={700}>
+        <Typography
+          variant="h6"
+          fontWeight={700}
+        >
           Other Sources
         </Typography>
 
@@ -564,9 +915,11 @@ function DataSources() {
           color="text.secondary"
           sx={{ mt: 0.5 }}
         >
-          Additional social platforms supported by Baseera.
+          Additional social platforms
+          supported by Baseera.
         </Typography>
       </Box>
+
 
       <Grid container spacing={3}>
         {otherSources.map((source) => (
@@ -577,10 +930,13 @@ function DataSources() {
             lg={4}
             key={source.name}
           >
-            <SourceCard source={source} />
+            <SourceCard
+              source={source}
+            />
           </Grid>
         ))}
       </Grid>
+
     </Box>
   );
 }
