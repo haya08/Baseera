@@ -30,7 +30,6 @@ import {
   collectInstagramData,
 } from "../services/metaAuth";
 
-
 // =========================
 // Social Sources
 // =========================
@@ -51,7 +50,6 @@ const socialSources = [
     icon: <InstagramIcon sx={{ fontSize: 32 }} />,
   },
 ];
-
 
 // =========================
 // Other Sources
@@ -80,7 +78,6 @@ const otherSources = [
     icon: <StorageIcon sx={{ fontSize: 30 }} />,
   },
 ];
-
 
 // =========================
 // Source Card
@@ -128,6 +125,7 @@ function SourceCard({
     >
       <CardContent sx={{ p: 3 }}>
         {/* Header */}
+
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -191,8 +189,8 @@ function SourceCard({
           />
         </Stack>
 
-
         {/* Description */}
+
         <Typography
           color="text.secondary"
           sx={{
@@ -204,8 +202,8 @@ function SourceCard({
           {source.description}
         </Typography>
 
-
         {/* Waiting For Meta */}
+
         {waitingForMeta && !connected ? (
           <Box
             sx={{
@@ -226,8 +224,8 @@ function SourceCard({
             </Typography>
           </Box>
         ) : connected ? (
-
           /* Connected Source */
+
           <Box sx={{ mt: 3 }}>
             <TextField
               fullWidth
@@ -271,10 +269,9 @@ function SourceCard({
                 : "Collect Data"}
             </Button>
           </Box>
-
         ) : (
-
           /* Not Connected */
+
           <Button
             variant="outlined"
             fullWidth
@@ -293,7 +290,6 @@ function SourceCard({
     </Card>
   );
 }
-
 
 // =========================
 // Data Sources Page
@@ -320,65 +316,64 @@ function DataSources() {
   const [collectingSource, setCollectingSource] =
     useState("");
 
-
   // =========================
   // Start Meta Authentication
   // =========================
 
- const handleConnectMeta = async () => {
-  // Open the new window immediately from the button click
-  // so the browser does not block it as a popup.
-  const metaWindow = window.open(
-    "about:blank",
-    "_blank"
-  );
-
-  try {
-    setIsConnecting(true);
-    setError("");
-
-    const data = await startMetaAuth();
-
-    if (!data.authorizationUrl) {
-      throw new Error(
-        "Meta authorization URL was not returned"
-      );
-    }
-
-    if (data.requestId) {
-      sessionStorage.setItem(
-        "baseera_meta_request_id",
-        data.requestId
-      );
-    }
-
-    if (metaWindow) {
-      // Navigate the newly opened window to Meta
-      metaWindow.location.href =
-        data.authorizationUrl;
-    } else {
-      // Fallback if browser blocked the popup
-      window.location.href =
-        data.authorizationUrl;
-    }
-  } catch (err) {
-    console.error(
-      "Meta authentication error:",
-      err
+  const handleConnectMeta = async () => {
+    // Open window immediately so browser
+    // does not block the popup.
+    const metaWindow = window.open(
+      "about:blank",
+      "_blank"
     );
 
-    if (metaWindow) {
-      metaWindow.close();
-    }
+    try {
+      setIsConnecting(true);
+      setError("");
+      setCollectionMessage("");
 
-    setError(
-      err?.message ||
-        "Unable to start Meta authentication."
-    );
-  } finally {
-    setIsConnecting(false);
-  }
-};
+      const data = await startMetaAuth();
+
+      if (!data.authorizationUrl) {
+        throw new Error(
+          "Meta authorization URL was not returned"
+        );
+      }
+
+      if (data.requestId) {
+        sessionStorage.setItem(
+          "baseera_meta_request_id",
+          data.requestId
+        );
+      }
+
+      if (metaWindow) {
+        metaWindow.location.href =
+          data.authorizationUrl;
+      } else {
+        // Fallback if popup was blocked.
+        window.location.href =
+          data.authorizationUrl;
+      }
+    } catch (err) {
+      console.error(
+        "Meta authentication error:",
+        err
+      );
+
+      if (metaWindow) {
+        metaWindow.close();
+      }
+
+      setError(
+        err?.message ||
+          "Unable to start Meta authentication."
+      );
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   // =========================
   // Check Meta Connection
@@ -422,16 +417,19 @@ function DataSources() {
         "Meta connected successfully. Your available sources are ready."
       );
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Meta connection error:",
+        err
+      );
 
       setError(
-        "Unable to check Meta connection. Please try again."
+        err?.message ||
+          "Unable to check Meta connection. Please try again."
       );
     } finally {
       setIsChecking(false);
     }
   };
-
 
   // =========================
   // Collect Data
@@ -446,9 +444,9 @@ function DataSources() {
       setError("");
       setCollectionMessage("");
 
-      if (!url) {
+      if (!url.trim()) {
         throw new Error(
-          "Please provide a source URL."
+          `Please provide a ${source} URL.`
         );
       }
 
@@ -456,7 +454,7 @@ function DataSources() {
         await collectFacebookData(url);
 
         setCollectionMessage(
-          "Facebook data collection started successfully."
+          "Facebook data collection completed successfully."
         );
       }
 
@@ -464,14 +462,17 @@ function DataSources() {
         await collectInstagramData(url);
 
         setCollectionMessage(
-          "Instagram data collection started successfully."
+          "Instagram data collection completed successfully."
         );
       }
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Collection error:",
+        err
+      );
 
       setError(
-        err.message ||
+        err?.message ||
           `Unable to collect ${source} data.`
       );
     } finally {
@@ -479,14 +480,12 @@ function DataSources() {
     }
   };
 
-
   // =========================
   // Render
   // =========================
 
   return (
     <Box>
-
       {/* =========================
           Page Header
       ========================= */}
@@ -507,7 +506,6 @@ function DataSources() {
         </Typography>
       </Box>
 
-
       {/* =========================
           Error Message
       ========================= */}
@@ -524,7 +522,6 @@ function DataSources() {
         </Alert>
       )}
 
-
       {/* =========================
           Success Message
       ========================= */}
@@ -540,7 +537,6 @@ function DataSources() {
           {collectionMessage}
         </Alert>
       )}
-
 
       {/* =========================
           Meta Authentication
@@ -581,7 +577,6 @@ function DataSources() {
             }}
             spacing={3}
           >
-
             {/* Meta Info */}
 
             <Stack
@@ -615,7 +610,6 @@ function DataSources() {
                   />
                 )}
               </Box>
-
 
               <Box>
                 <Stack
@@ -656,11 +650,13 @@ function DataSources() {
               </Box>
             </Stack>
 
-
             {/* Meta Actions */}
 
             <Stack
-              direction="row"
+              direction={{
+                xs: "column",
+                sm: "row",
+              }}
               spacing={2}
             >
               {!metaConnected && (
@@ -704,7 +700,6 @@ function DataSources() {
             </Stack>
           </Stack>
 
-
           {/* Meta Description */}
 
           <Box
@@ -727,7 +722,6 @@ function DataSources() {
         </CardContent>
       </Card>
 
-
       {/* =========================
           Connected Meta Pages
       ========================= */}
@@ -735,7 +729,6 @@ function DataSources() {
       {metaConnected &&
         metaPages.length > 0 && (
           <Box sx={{ mb: 5 }}>
-
             <Box sx={{ mb: 2 }}>
               <Typography
                 variant="h6"
@@ -753,7 +746,6 @@ function DataSources() {
                 Meta account.
               </Typography>
             </Box>
-
 
             <Grid
               container
@@ -846,7 +838,6 @@ function DataSources() {
           </Box>
         )}
 
-
       {/* =========================
           Social Sources
       ========================= */}
@@ -868,7 +859,6 @@ function DataSources() {
           own data connector.
         </Typography>
       </Box>
-
 
       <Grid
         container
@@ -897,7 +887,6 @@ function DataSources() {
         ))}
       </Grid>
 
-
       {/* =========================
           Other Sources
       ========================= */}
@@ -920,7 +909,6 @@ function DataSources() {
         </Typography>
       </Box>
 
-
       <Grid container spacing={3}>
         {otherSources.map((source) => (
           <Grid
@@ -936,7 +924,6 @@ function DataSources() {
           </Grid>
         ))}
       </Grid>
-
     </Box>
   );
 }
