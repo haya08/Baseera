@@ -55,7 +55,7 @@ const otherSources = [
   },
 ];
 
-function SourceCard({ source }) {
+function SourceCard({ source, waitingForMeta = false }) {
   return (
     <Card
       sx={{
@@ -110,7 +110,7 @@ function SourceCard({ source }) {
           </Stack>
 
           <Chip
-            label="Not Connected"
+            label={waitingForMeta ? "Waiting for Meta" : "Not Connected"}
             size="small"
             variant="outlined"
             sx={{
@@ -131,19 +131,40 @@ function SourceCard({ source }) {
           {source.description}
         </Typography>
 
-        <Button
-          variant="outlined"
-          fullWidth
-          startIcon={<LinkIcon />}
-          sx={{
-            mt: 3,
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-          }}
-        >
-          Connect
-        </Button>
+        {waitingForMeta ? (
+          <Box
+            sx={{
+              mt: 3,
+              py: 1.15,
+              px: 2,
+              borderRadius: 2,
+              bgcolor: "action.hover",
+              textAlign: "center",
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              fontWeight={500}
+            >
+              Connect your Meta account first
+            </Typography>
+          </Box>
+        ) : (
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<LinkIcon />}
+            sx={{
+              mt: 3,
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Connect
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
@@ -228,7 +249,7 @@ function DataSources() {
 
             <Button
               variant="contained"
-              size="small"
+              size="large"
               startIcon={<LinkIcon />}
               sx={{
                 borderRadius: 2,
@@ -271,9 +292,9 @@ function DataSources() {
 
       <Grid container spacing={3} sx={{ mb: 5 }}>
         {socialSources.map((source) => (
-          <Grid item xs={12} md={6} key={source.name}>
-            <SourceCard source={source} />
-          </Grid>
+            <Grid item xs={12} md={6} key={source.name}>
+            <SourceCard source={source} waitingForMeta />
+            </Grid>
         ))}
       </Grid>
 
