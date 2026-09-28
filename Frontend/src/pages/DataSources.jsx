@@ -13,11 +13,17 @@ import HubIcon from "@mui/icons-material/Hub";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import RedditIcon from "@mui/icons-material/Language";
-// import CloudIcon from "@mui/icons-material/Cloud";
 import StorageIcon from "@mui/icons-material/Storage";
 import LinkIcon from "@mui/icons-material/Link";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import RefreshIcon from "@mui/icons-material/Refresh";
+
 import { useState } from "react";
-import { startMetaAuth } from "../services/metaAuth";
+
+import {
+  startMetaAuth,
+  checkMetaConnection,
+} from "../services/metaAuth";
 
 const socialSources = [
   {
@@ -41,36 +47,45 @@ const otherSources = [
     name: "Reddit",
     description:
       "Collect public discussions and community content.",
+    type: "Reddit",
     icon: <RedditIcon sx={{ fontSize: 30 }} />,
   },
   {
     name: "Bluesky",
     description:
       "Collect social content and conversations from Bluesky.",
+    type: "Bluesky",
     icon: <LinkIcon sx={{ fontSize: 30 }} />,
   },
   {
     name: "Mastodon",
     description:
       "Collect social content from connected Mastodon sources.",
+    type: "Mastodon",
     icon: <StorageIcon sx={{ fontSize: 30 }} />,
   },
 ];
 
-function SourceCard({ source, waitingForMeta = false }) {
+function SourceCard({
+  source,
+  waitingForMeta = false,
+  connected = false,
+}) {
   return (
     <Card
       sx={{
         height: "100%",
         borderRadius: 3,
         border: "1px solid",
-        borderColor: "divider",
+        borderColor: connected ? "success.main" : "divider",
         boxShadow: "none",
         transition: "all 0.2s ease",
         "&:hover": {
           transform: "translateY(-3px)",
           boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-          borderColor: "primary.light",
+          borderColor: connected
+            ? "success.main"
+            : "primary.light",
         },
       }}
     >
@@ -89,8 +104,12 @@ function SourceCard({ source, waitingForMeta = false }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: "action.hover",
-                color: "text.primary",
+                bgcolor: connected
+                  ? "success.light"
+                  : "action.hover",
+                color: connected
+                  ? "success.dark"
+                  : "text.primary",
               }}
             >
               {source.icon}
@@ -112,13 +131,16 @@ function SourceCard({ source, waitingForMeta = false }) {
           </Stack>
 
           <Chip
-            label={waitingForMeta ? "Waiting for Meta" : "Not Connected"}
+            label={
+              connected
+                ? "Connected"
+                : waitingForMeta
+                ? "Waiting for Meta"
+                : "Not Connected"
+            }
             size="small"
+            color={connected ? "success" : "default"}
             variant="outlined"
-            sx={{
-              color: "text.secondary",
-              borderColor: "divider",
-            }}
           />
         </Stack>
 
@@ -133,7 +155,7 @@ function SourceCard({ source, waitingForMeta = false }) {
           {source.description}
         </Typography>
 
-        {waitingForMeta ? (
+        {waitingForMeta && !connected ? (
           <Box
             sx={{
               mt: 3,
@@ -152,7 +174,7 @@ function SourceCard({ source, waitingForMeta = false }) {
               Connect your Meta account first
             </Typography>
           </Box>
-        ) : (
+        ) : !waitingForMeta ? (
           <Button
             variant="outlined"
             fullWidth
@@ -166,34 +188,80 @@ function SourceCard({ source, waitingForMeta = false }) {
           >
             Connect
           </Button>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
 }
 
 function DataSources() {
-    
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
+
+  const [metaConnected, setMetaConnected] = useState(false);
+  const [metaPages, setMetaPages] = useState([]);
+
   const [error, setError] = useState("");
 
   const handleConnectMeta = async () => {
     try {
-        setIsConnecting(true);
-        setError("");
+      setIsConnecting(true);
+      setError("");
 
-        const data = await startMetaAuth();
+      const data = await startMetaAuth();
 
-        if (!data.authorizationUrl) {
-        throw new Error("Meta authorization URL was not returned");
-        }
+      if (!data.authorizationUrl || !data.requestId) {
+        throw new Error(
+          "Meta authorization data was not returned"
+        );
+      }
 
-        window.location.href = data.authorizationUrl;
+      sessionStorage.setItem(
+        "baseera_meta_request_id",
+        data.requestId
+      );
+
+      window.open(data.authorizationUrl, "_blank");
     } catch (err) {
-        console.error(err);
-        setError("Unable to start Meta authentication.");
+      console.error(err);
+      setError("Unable to start Meta authentication.");
     } finally {
-        setIsConnecting(false);
+      setIsConnecting(false);
+    }
+  };
+
+  const handleCheckConnection = async () => {
+    try {
+      setIsChecking(true);
+      setError("");
+
+      const requestId = sessionStorage.getItem(
+        "baseera_meta_request_id"
+      );
+
+      if (!requestId) {
+        throw new Error("No Meta request ID found.");
+      }
+
+      const data = await checkMetaConnection(requestId);
+
+      if (!data.connected) {
+        setMetaConnected(false);
+        setError(
+          "Meta is not connected yet. Complete the Facebook authorization first."
+        );
+        return;
+      }
+
+      setMetaConnected(true);
+      setMetaPages(data.pages || []);
+    } catch (err) {
+      console.error(err);
+      setError(
+        "Unable to check Meta connection. Please try again."
+      );
+    } finally {
+      setIsChecking(false);
     }
   };
 
@@ -206,10 +274,25 @@ function DataSources() {
         </Typography>
 
         <Typography color="text.secondary">
-          Connect your social platforms and collect data for the Baseera
-          knowledge pipeline.
+          Connect your social platforms and collect data for the
+          Baseera knowledge pipeline.
         </Typography>
       </Box>
+
+      {/* Error */}
+      {error && (
+        <Typography
+          color="error"
+          sx={{
+            mb: 3,
+            p: 2,
+            borderRadius: 2,
+            bgcolor: "#ffebee",
+          }}
+        >
+          {error}
+        </Typography>
+      )}
 
       {/* Meta Authentication */}
       <Card
@@ -217,10 +300,13 @@ function DataSources() {
           mb: 5,
           borderRadius: 3,
           border: "1px solid",
-          borderColor: "primary.main",
+          borderColor: metaConnected
+            ? "success.main"
+            : "primary.main",
           boxShadow: "none",
-          background:
-            "linear-gradient(135deg, rgba(25,118,210,0.06), rgba(255,255,255,1))",
+          background: metaConnected
+            ? "linear-gradient(135deg, rgba(46,125,50,0.06), rgba(255,255,255,1))"
+            : "linear-gradient(135deg, rgba(25,118,210,0.06), rgba(255,255,255,1))",
         }}
       >
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
@@ -239,11 +325,17 @@ function DataSources() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  bgcolor: "primary.main",
+                  bgcolor: metaConnected
+                    ? "success.main"
+                    : "primary.main",
                   color: "white",
                 }}
               >
-                <HubIcon sx={{ fontSize: 34 }} />
+                {metaConnected ? (
+                  <CheckCircleIcon sx={{ fontSize: 34 }} />
+                ) : (
+                  <HubIcon sx={{ fontSize: 34 }} />
+                )}
               </Box>
 
               <Box>
@@ -258,9 +350,15 @@ function DataSources() {
                   </Typography>
 
                   <Chip
-                    label="Authentication"
+                    label={
+                      metaConnected
+                        ? "Connected"
+                        : "Authentication"
+                    }
                     size="small"
-                    color="primary"
+                    color={
+                      metaConnected ? "success" : "primary"
+                    }
                   />
                 </Stack>
 
@@ -273,21 +371,44 @@ function DataSources() {
               </Box>
             </Stack>
 
-            <Button
-                variant="contained"
-                size="large"
-                startIcon={<LinkIcon />}
-                onClick={handleConnectMeta}
-                disabled={isConnecting}
-                sx={{
+            <Stack direction="row" spacing={2}>
+              {!metaConnected && (
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<LinkIcon />}
+                  onClick={handleConnectMeta}
+                  disabled={isConnecting}
+                  sx={{
                     borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 600,
                     px: 3,
-                }}
+                  }}
                 >
-                {isConnecting ? "Connecting..." : "Connect Meta"}
-            </Button>
+                  {isConnecting
+                    ? "Connecting..."
+                    : "Connect Meta"}
+                </Button>
+              )}
+
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<RefreshIcon />}
+                onClick={handleCheckConnection}
+                disabled={isChecking}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
+              >
+                {isChecking
+                  ? "Checking..."
+                  : "Check Connection"}
+              </Button>
+            </Stack>
           </Stack>
 
           <Box
@@ -298,31 +419,137 @@ function DataSources() {
               borderColor: "divider",
             }}
           >
-            <Typography color="text.secondary" lineHeight={1.7}>
-              Connect your Meta business account once. Baseera will then
-              discover your managed Facebook Pages and connected Instagram
-              Business accounts.
+            <Typography
+              color="text.secondary"
+              lineHeight={1.7}
+            >
+              {metaConnected
+                ? "Your Meta account is connected. Baseera discovered the available social sources."
+                : "Connect your Meta business account once. Baseera will then discover your managed Facebook Pages and connected Instagram Business accounts."}
             </Typography>
           </Box>
         </CardContent>
       </Card>
 
-      {/* Connected Social Sources */}
+      {/* Discovered Meta Pages */}
+      {metaConnected && metaPages.length > 0 && (
+        <Box sx={{ mb: 5 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="h6" fontWeight={700}>
+              Connected Meta Sources
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 0.5 }}
+            >
+              Sources discovered from your Meta account.
+            </Typography>
+          </Box>
+
+          <Grid container spacing={3}>
+            {metaPages.map((page, index) => (
+              <Grid
+                item
+                xs={12}
+                md={6}
+                key={page.pageId || page.id || index}
+              >
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    border: "1px solid",
+                    borderColor: "success.light",
+                    boxShadow: "none",
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Stack
+                      direction="row"
+                      spacing={2}
+                      alignItems="center"
+                    >
+                      <Box
+                        sx={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          bgcolor: "success.light",
+                          color: "success.dark",
+                        }}
+                      >
+                        <FacebookIcon />
+                      </Box>
+
+                      <Box>
+                        <Typography
+                          variant="h6"
+                          fontWeight={700}
+                        >
+                          {page.pageName ||
+                            page.name ||
+                            "Facebook Page"}
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                        >
+                          Connected Meta Page
+                        </Typography>
+
+                        {page.instagramBusinessAccountId && (
+                          <Typography
+                            variant="body2"
+                            color="success.main"
+                            sx={{ mt: 0.5 }}
+                          >
+                            Instagram Business Account connected
+                          </Typography>
+                        )}
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+
+      {/* Social Sources */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="h6" fontWeight={700}>
           Social Sources
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 0.5 }}
+        >
           Each platform is handled by its own data connector.
         </Typography>
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 5 }}>
         {socialSources.map((source) => (
-            <Grid item xs={12} md={6} key={source.name}>
-            <SourceCard source={source} waitingForMeta />
-            </Grid>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            key={source.name}
+          >
+            <SourceCard
+              source={source}
+              waitingForMeta={!metaConnected}
+              connected={metaConnected}
+            />
+          </Grid>
         ))}
       </Grid>
 
@@ -332,14 +559,24 @@ function DataSources() {
           Other Sources
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 0.5 }}
+        >
           Additional social platforms supported by Baseera.
         </Typography>
       </Box>
 
       <Grid container spacing={3}>
         {otherSources.map((source) => (
-          <Grid item xs={12} md={6} lg={4} key={source.name}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            lg={4}
+            key={source.name}
+          >
             <SourceCard source={source} />
           </Grid>
         ))}
