@@ -1,9 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
-
-function Dashboard() {
-  return <h1>Dashboard</h1>;
-}
+import Dashboard from "./pages/Dashboard";
 
 function DataSources() {
   return <h1>Data Sources</h1>;
@@ -27,14 +24,22 @@ function App() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
           <Route path="/dashboard" element={<Dashboard />} />
+
           <Route path="/data-sources" element={<DataSources />} />
+
           <Route path="/collected-data" element={<CollectedData />} />
+
           <Route
             path="/knowledge-extraction"
             element={<KnowledgeExtraction />}
           />
-          <Route path="/knowledge-graph" element={<KnowledgeGraph />} />
+
+          <Route
+            path="/knowledge-graph"
+            element={<KnowledgeGraph />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>
