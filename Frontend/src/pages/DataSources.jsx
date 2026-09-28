@@ -16,6 +16,8 @@ import RedditIcon from "@mui/icons-material/Language";
 // import CloudIcon from "@mui/icons-material/Cloud";
 import StorageIcon from "@mui/icons-material/Storage";
 import LinkIcon from "@mui/icons-material/Link";
+import { useState } from "react";
+import { startMetaAuth } from "../services/metaAuth";
 
 const socialSources = [
   {
@@ -171,6 +173,30 @@ function SourceCard({ source, waitingForMeta = false }) {
 }
 
 function DataSources() {
+    
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleConnectMeta = async () => {
+    try {
+        setIsConnecting(true);
+        setError("");
+
+        const data = await startMetaAuth();
+
+        if (!data.authorizationUrl) {
+        throw new Error("Meta authorization URL was not returned");
+        }
+
+        window.location.href = data.authorizationUrl;
+    } catch (err) {
+        console.error(err);
+        setError("Unable to start Meta authentication.");
+    } finally {
+        setIsConnecting(false);
+    }
+  };
+
   return (
     <Box>
       {/* Page Header */}
@@ -248,17 +274,19 @@ function DataSources() {
             </Stack>
 
             <Button
-              variant="contained"
-              size="large"
-              startIcon={<LinkIcon />}
-              sx={{
-                borderRadius: 2,
-                textTransform: "none",
-                fontWeight: 600,
-                px: 3,
-              }}
-            >
-              Connect Meta
+                variant="contained"
+                size="large"
+                startIcon={<LinkIcon />}
+                onClick={handleConnectMeta}
+                disabled={isConnecting}
+                sx={{
+                    borderRadius: 2,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    px: 3,
+                }}
+                >
+                {isConnecting ? "Connecting..." : "Connect Meta"}
             </Button>
           </Stack>
 
