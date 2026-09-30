@@ -332,7 +332,7 @@ public sealed class KnowledgePersistenceServiceTests
 
         var resolvedRelationship = new ResolvedRelationship
         {
-            ExtractedRelationshipId = "rel_1",
+            //ExtractedRelationshipId = "rel_1",
             SourceEntityId = sourceEntityId,
             Relationship = RelationshipType.HasProduct,
             TargetEntityId = targetEntityId

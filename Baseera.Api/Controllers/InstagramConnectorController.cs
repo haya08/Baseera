@@ -1,3 +1,4 @@
+using Baseera.Core.KnowledgeIngestion;
 using Baseera.Infrastructure.Connectors.Instagram;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +9,14 @@ namespace Baseera.Api.Controllers;
 public sealed class InstagramConnectorController : ControllerBase
 {
     private readonly InstagramConnector _connector;
+    private readonly IKnowledgeIngestionService _ingestionService;
 
     public InstagramConnectorController(
-        InstagramConnector connector)
+        InstagramConnector connector,
+        IKnowledgeIngestionService ingestionService)
     {
         _connector = connector;
+        _ingestionService = ingestionService;
     }
 
     [HttpPost]
@@ -25,7 +29,12 @@ public sealed class InstagramConnectorController : ControllerBase
                 request.Url,
                 cancellationToken);
 
-        return Ok(documents);
+        var results =
+            await _ingestionService.ProcessAsync(
+                documents,
+                cancellationToken);
+
+        return Ok(results);
     }
 }
 
